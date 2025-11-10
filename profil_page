@@ -14,6 +14,34 @@ class _ProfilPageState extends State<ProfilPage> {
   final TextEditingController _tanggalController = TextEditingController();
   String _preferensi = 'Getar';
 
+  // Fungsi untuk mendapatkan ikon berdasarkan preferensi
+  IconData _getNotificationIcon() {
+    switch (_preferensi) {
+      case 'Bunyi':
+        return Icons.notifications;
+      case 'Getar':
+        return Icons.vibration;
+      case 'Senyap':
+        return Icons.notifications_off;
+      default:
+        return Icons.notifications;
+    }
+  }
+
+  // Fungsi untuk mendapatkan warna ikon berdasarkan preferensi
+  Color _getNotificationColor() {
+    switch (_preferensi) {
+      case 'Bunyi':
+        return Colors.green;
+      case 'Getar':
+        return Colors.green;
+      case 'Senyap':
+        return Colors.green;
+      default:
+        return Colors.green;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -117,8 +145,8 @@ class _ProfilPageState extends State<ProfilPage> {
       child: InputDecorator(
         decoration: InputDecoration(
           prefixIcon: Icon(
-            Icons.notifications_active,
-            color: const Color.fromARGB(255, 58, 183, 108),
+            _getNotificationIcon(),
+            color: _getNotificationColor(), // Warna ikon juga berubah
           ),
           labelText: 'Preferensi Notifikasi',
           labelStyle: const TextStyle(
@@ -155,6 +183,7 @@ class _ProfilPageState extends State<ProfilPage> {
             ),
             borderRadius: BorderRadius.circular(12),
             items: const [
+              // Hanya teks tanpa ikon tambahan
               DropdownMenuItem(value: 'Bunyi', child: Text('Bunyi')),
               DropdownMenuItem(value: 'Getar', child: Text('Getar')),
               DropdownMenuItem(value: 'Senyap', child: Text('Senyap')),
@@ -355,57 +384,9 @@ class _ProfilPageState extends State<ProfilPage> {
             ),
 
             const SizedBox(height: 20),
-
-            // Info Statistik
-            Card(
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildStatItem(Icons.medical_services, 'Obat Aktif', '3'),
-                    _buildStatItem(Icons.calendar_today, 'Hari Ini', '2'),
-                    _buildStatItem(Icons.check_circle, 'Telah Diminum', '1'),
-                  ],
-                ),
-              ),
-            ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildStatItem(IconData icon, String title, String value) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 58, 183, 108).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            icon,
-            color: const Color.fromARGB(255, 58, 183, 108),
-            size: 24,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Color.fromARGB(255, 58, 183, 108),
-          ),
-        ),
-        Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-      ],
     );
   }
 
