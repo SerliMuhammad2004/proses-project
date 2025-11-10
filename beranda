@@ -48,10 +48,39 @@ class _BerandaPageState extends State<BerandaPage> {
   String _getProgressMessage() {
     if (_progressPercentage == 1)
       return 'Selamat! Semua obat sudah diminum hari ini';
-    if (_progressPercentage >= 0.8) return 'Hampir selesai! Tetap semangat';
+    if (_progressPercentage >= 0.8) return 'Hampir selesai! Tetap semangat.';
     if (_progressPercentage >= 0.5)
-      return 'Bagus! Lanjutkan minum obat sesuai jadwal ';
-    return 'Jangan lupa minum obat sesuai jadwal ya! ';
+      return 'Bagus! Lanjutkan minum obat sesuai jadwal';
+    return 'Jangan lupa minum obat sesuai jadwal ya!';
+  }
+
+  // Variabel untuk mengontrol tampilan snackbar
+  bool _showMotivationMessage = true;
+
+  void _showMotivationSnackbar() {
+    if (_showMotivationMessage) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _getProgressMessage(),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+          backgroundColor: _getProgressColor(),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 3),
+          action: SnackBarAction(
+            label: 'Tutup',
+            textColor: Colors.white,
+            onPressed: () {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            },
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -221,6 +250,10 @@ class _BerandaPageState extends State<BerandaPage> {
                     onChanged: (value) {
                       setState(() {
                         med['isChecked'] = value!;
+                        // Tampilkan pesan motivasi saat checkbox diubah
+                        if (value == true) {
+                          _showMotivationSnackbar();
+                        }
                       });
                     },
                     onDelete: () {
@@ -229,74 +262,6 @@ class _BerandaPageState extends State<BerandaPage> {
                   );
                 }).toList(),
               ),
-
-            const SizedBox(height: 24),
-
-            // Progress circle dengan pesan motivasi
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox(
-                        width: 120,
-                        height: 120,
-                        child: CircularProgressIndicator(
-                          value: _progressPercentage,
-                          strokeWidth: 8,
-                          backgroundColor: Colors.grey[200],
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            _getProgressColor(),
-                          ),
-                        ),
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            '$_totalChecked',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          Text(
-                            '/${_medications.length}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _getProgressMessage(),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[700],
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
 
             const SizedBox(height: 20),
           ],
