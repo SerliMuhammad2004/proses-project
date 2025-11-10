@@ -1,0 +1,626 @@
+import 'package:flutter/material.dart';
+import 'package:meditime/screens/tambahobat_page.dart';
+
+class BerandaPage extends StatefulWidget {
+  const BerandaPage({super.key});
+
+  @override
+  _BerandaPageState createState() => _BerandaPageState();
+}
+
+class _BerandaPageState extends State<BerandaPage> {
+  List<Map<String, dynamic>> _medications = [
+    {
+      'name': 'Vitamin D',
+      'dose': '1 Kapsul, 1000mg',
+      'time': '09:41',
+      'isChecked': true,
+      'type': 'Vitamin',
+    },
+    {
+      'name': 'Paracetamol',
+      'dose': '1 Tablet, 500mg',
+      'time': '16:00',
+      'isChecked': false,
+      'type': 'Obat Bebas',
+    },
+    {
+      'name': 'Amoxicillin',
+      'dose': '1 Kapsul, 250mg',
+      'time': '12:00',
+      'isChecked': false,
+      'type': 'Antibiotik',
+    },
+  ];
+
+  int get _totalChecked =>
+      _medications.where((med) => med['isChecked'] == true).length;
+
+  double get _progressPercentage =>
+      _medications.isEmpty ? 0 : (_totalChecked / _medications.length);
+
+  Color _getProgressColor() {
+    if (_progressPercentage >= 0.8) return Colors.green;
+    if (_progressPercentage >= 0.5) return Colors.orange;
+    return Colors.red;
+  }
+
+  String _getProgressMessage() {
+    if (_progressPercentage == 1)
+      return 'Selamat! Semua obat sudah diminum hari ini';
+    if (_progressPercentage >= 0.8) return 'Hampir selesai! Tetap semangat';
+    if (_progressPercentage >= 0.5)
+      return 'Bagus! Lanjutkan minum obat sesuai jadwal ';
+    return 'Jangan lupa minum obat sesuai jadwal ya! ';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final DateTime now = DateTime.now();
+    final String formattedDate =
+        "${now.day} ${_getMonthName(now.month)} ${now.year}";
+    final String formattedTime =
+        "${now.hour}:${now.minute.toString().padLeft(2, '0')}";
+    final String dayName = _getDayName(now.weekday);
+
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header dengan gradient
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color.fromARGB(255, 58, 183, 108),
+                    Color.fromARGB(255, 76, 199, 130),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    formattedTime,
+                    style: const TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$formattedDate • $dayName',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Progress indicator linear
+                  Container(
+                    height: 8,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Stack(
+                      children: [
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            return Container(
+                              width: constraints.maxWidth * _progressPercentage,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Colors.white, Colors.white70],
+                                ),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Progress Hari Ini',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                      ),
+                      Text(
+                        '$_totalChecked/${_medications.length}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Section title dengan icon
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(
+                      255,
+                      58,
+                      183,
+                      108,
+                    ).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.medication_liquid,
+                    color: const Color.fromARGB(255, 58, 183, 108),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Daftar Obat Hari Ini',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${_medications.length} obat',
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // List obat
+            if (_medications.isEmpty)
+              _buildEmptyState()
+            else
+              Column(
+                children: _medications.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final med = entry.value;
+                  return MedicationItem(
+                    name: med['name']!,
+                    dose: med['dose']!,
+                    time: med['time']!,
+                    type: med['type']!,
+                    isChecked: med['isChecked'] ?? false,
+                    onChanged: (value) {
+                      setState(() {
+                        med['isChecked'] = value!;
+                      });
+                    },
+                    onDelete: () {
+                      _showDeleteDialog(index);
+                    },
+                  );
+                }).toList(),
+              ),
+
+            const SizedBox(height: 24),
+
+            // Progress circle dengan pesan motivasi
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 120,
+                        height: 120,
+                        child: CircularProgressIndicator(
+                          value: _progressPercentage,
+                          strokeWidth: 8,
+                          backgroundColor: Colors.grey[200],
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            _getProgressColor(),
+                          ),
+                        ),
+                      ),
+                      Column(
+                        children: [
+                          Text(
+                            '$_totalChecked',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          Text(
+                            '/${_medications.length}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    _getProgressMessage(),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[700],
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+
+      // Floating Action Button dengan shadow
+      floatingActionButton: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        child: FloatingActionButton(
+          onPressed: _navigateAndAddMedication,
+          backgroundColor: const Color.fromARGB(255, 58, 183, 108),
+          elevation: 8,
+          child: const Icon(Icons.add, color: Colors.white, size: 28),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.medication_outlined, size: 64, color: Colors.grey[300]),
+          const SizedBox(height: 16),
+          const Text(
+            'Belum ada obat untuk hari ini',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Tap tombol + untuk menambah obat',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteDialog(int index) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus Obat'),
+        content: Text(
+          'Apakah Anda yakin ingin menghapus ${_medications[index]['name']}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _medications.removeAt(index);
+              });
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Obat berhasil dihapus'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _navigateAndAddMedication() async {
+    final newMedication = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AddMedicationPage()),
+    );
+
+    if (newMedication != null && mounted) {
+      setState(() {
+        _medications.add({
+          'name': newMedication['name'],
+          'dose': newMedication['dose'],
+          'time': newMedication['time'],
+          'type': newMedication['type'] ?? 'Obat Umum',
+          'isChecked': false,
+        });
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Obat berhasil ditambahkan!'),
+          backgroundColor: const Color.fromARGB(255, 58, 183, 108),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    }
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
+    return months[month - 1];
+  }
+
+  String _getDayName(int weekday) {
+    const days = [
+      'Minggu',
+      'Senin',
+      'Selasa',
+      'Rabu',
+      'Kamis',
+      'Jumat',
+      'Sabtu',
+    ];
+    return days[weekday - 1];
+  }
+}
+
+class MedicationItem extends StatelessWidget {
+  final String name;
+  final String dose;
+  final String time;
+  final String type;
+  final bool isChecked;
+  final ValueChanged<bool?> onChanged;
+  final VoidCallback? onDelete;
+
+  const MedicationItem({
+    required this.name,
+    required this.dose,
+    required this.time,
+    required this.type,
+    required this.isChecked,
+    required this.onChanged,
+    this.onDelete,
+  });
+
+  Color _getTypeColor() {
+    switch (type) {
+      case 'Vitamin':
+        return Colors.orange;
+      case 'Antibiotik':
+        return Colors.red;
+      case 'Obat Bebas':
+        return Colors.blue;
+      case 'Obat Resep':
+        return Colors.purple;
+      case 'Suplemen':
+        return Colors.teal;
+      case 'Herbal':
+        return Colors.green;
+      case 'Lainnya':
+        return Colors.grey;
+      default:
+        return const Color.fromARGB(255, 58, 183, 108);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Checkbox dengan custom design
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: isChecked
+                      ? const Color.fromARGB(255, 58, 183, 108)
+                      : Colors.transparent,
+                  border: Border.all(
+                    color: isChecked
+                        ? const Color.fromARGB(255, 58, 183, 108)
+                        : Colors.grey[300]!,
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Checkbox(
+                  value: isChecked,
+                  onChanged: onChanged,
+                  activeColor: Colors.transparent,
+                  checkColor: Colors.white,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 16),
+
+              // Info obat
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            name,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: isChecked ? Colors.grey : Colors.black87,
+                              decoration: isChecked
+                                  ? TextDecoration.lineThrough
+                                  : null,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _getTypeColor().withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            type,
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: _getTypeColor(),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      dose,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isChecked ? Colors.grey : Colors.grey[600],
+                        decoration: isChecked
+                            ? TextDecoration.lineThrough
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time,
+                          size: 14,
+                          color: isChecked
+                              ? Colors.grey
+                              : const Color.fromARGB(255, 58, 183, 108),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          time,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: isChecked
+                                ? Colors.grey
+                                : const Color.fromARGB(255, 58, 183, 108),
+                            fontWeight: FontWeight.w500,
+                            decoration: isChecked
+                                ? TextDecoration.lineThrough
+                                : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Tombol delete
+              if (onDelete != null)
+                IconButton(
+                  icon: Icon(Icons.delete_outline, color: Colors.grey[400]),
+                  onPressed: onDelete,
+                  iconSize: 20,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
