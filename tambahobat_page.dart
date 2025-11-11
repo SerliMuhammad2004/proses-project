@@ -10,16 +10,13 @@ class AddMedicationPage extends StatefulWidget {
 class _AddMedicationPageState extends State<AddMedicationPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _doseController = TextEditingController();
-  final TextEditingController _typeController = TextEditingController();
   DateTime? _selectedDateTime;
-  String _selectedType = 'Obat Umum';
+  String _selectedType = 'Vitamin'; // Default value yang sesuai dengan daftar
 
-  // Daftar tipe obat
+  // Daftar tipe obat yang lengkap dan konsisten
   final List<String> _medicationTypes = [
-    'Obat Umum',
     'Vitamin',
     'Antibiotik',
-    'Obat Bebas',
     'Obat Resep',
     'Suplemen',
     'Herbal',
@@ -28,13 +25,13 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
 
   // Fungsi untuk memilih tanggal dan waktu
   Future<void> _pickDateTime() async {
-    DateTime now = DateTime.now();
+    DateTime initialDate = _selectedDateTime ?? DateTime.now();
 
     // Pilih tanggal
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: now,
-      firstDate: now,
+      initialDate: initialDate,
+      firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     );
 
@@ -42,7 +39,9 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
       // Pilih waktu
       final TimeOfDay? pickedTime = await showTimePicker(
         context: context,
-        initialTime: TimeOfDay.fromDateTime(now),
+        initialTime: _selectedDateTime != null
+            ? TimeOfDay.fromDateTime(_selectedDateTime!)
+            : TimeOfDay.now(),
       );
 
       if (pickedTime != null) {
@@ -65,6 +64,7 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
     final time = _selectedDateTime;
     final type = _selectedType;
 
+    // Validasi input
     if (name.isEmpty || dose.isEmpty || time == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -79,12 +79,14 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
       return;
     }
 
+    // Format data untuk dikembalikan
     final newMedication = {
       'name': name,
       'dose': dose,
-      'time':
-          "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}",
+      'time': time,
       'type': type,
+      'formattedTime':
+          "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}",
     };
 
     Navigator.pop(context, newMedication);
@@ -96,8 +98,6 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
         return Colors.orange;
       case 'Antibiotik':
         return Colors.red;
-      case 'Obat Bebas':
-        return Colors.blue;
       case 'Obat Resep':
         return Colors.purple;
       case 'Suplemen':
@@ -114,22 +114,22 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
   @override
   Widget build(BuildContext context) {
     String timeText = _selectedDateTime != null
-        ? "${_selectedDateTime!.hour.toString().padLeft(2, '0')}:${_selectedDateTime!.minute.toString().padLeft(2, '0')}"
-        : "Pilih waktu minum obat";
+        ? "${_selectedDateTime!.day}/${_selectedDateTime!.month}/${_selectedDateTime!.year} • ${_selectedDateTime!.hour.toString().padLeft(2, '0')}:${_selectedDateTime!.minute.toString().padLeft(2, '0')}"
+        : "Pilih tanggal dan waktu";
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tambah Obat Baru'),
         backgroundColor: const Color.fromARGB(255, 58, 183, 108),
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // Header informasi
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -162,33 +162,12 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Nama Obat
-                    Text(
-                      'Nama Obat',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
-                      ),
-                    ),
+                    _buildSectionLabel('Nama Obat'),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _nameController,
-                      decoration: InputDecoration(
+                      decoration: _buildInputDecoration(
                         hintText: 'Contoh: Paracetamol, Vitamin C, dll.',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 58, 183, 108),
-                            width: 2,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
                       ),
                       style: const TextStyle(fontSize: 16),
                     ),
@@ -196,33 +175,12 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
                     const SizedBox(height: 20),
 
                     // Dosis Obat
-                    Text(
-                      'Dosis',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
-                      ),
-                    ),
+                    _buildSectionLabel('Dosis'),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _doseController,
-                      decoration: InputDecoration(
+                      decoration: _buildInputDecoration(
                         hintText: 'Contoh: 1 Tablet 500mg, 2 Kapsul, dll.',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 58, 183, 108),
-                            width: 2,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
                       ),
                       style: const TextStyle(fontSize: 16),
                     ),
@@ -230,20 +188,13 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
                     const SizedBox(height: 20),
 
                     // Tipe Obat
-                    Text(
-                      'Tipe Obat',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
-                      ),
-                    ),
+                    _buildSectionLabel('Tipe Obat'),
                     const SizedBox(height: 8),
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[300]!, width: 1),
+                        border: Border.all(color: Colors.grey.shade300),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: DropdownButtonHideUnderline(
@@ -252,7 +203,7 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
                           isExpanded: true,
                           icon: Icon(
                             Icons.arrow_drop_down,
-                            color: Colors.grey[600],
+                            color: Colors.grey.shade600,
                           ),
                           items: _medicationTypes.map((String type) {
                             return DropdownMenuItem<String>(
@@ -268,7 +219,10 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
                                     ),
                                   ),
                                   const SizedBox(width: 12),
-                                  Text(type),
+                                  Text(
+                                    type,
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
                                 ],
                               ),
                             );
@@ -285,17 +239,11 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
                     const SizedBox(height: 20),
 
                     // Waktu Minum Obat
-                    Text(
-                      'Waktu Minum Obat',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
-                      ),
-                    ),
+                    _buildSectionLabel('Waktu Minum Obat'),
                     const SizedBox(height: 8),
                     InkWell(
                       onTap: _pickDateTime,
+                      borderRadius: BorderRadius.circular(12),
                       child: Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(
@@ -304,10 +252,20 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
                         ),
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Colors.grey[300]!,
-                            width: 1,
+                            color: _selectedDateTime != null
+                                ? const Color.fromARGB(255, 58, 183, 108)
+                                : Colors.grey.shade300,
+                            width: _selectedDateTime != null ? 2 : 1,
                           ),
                           borderRadius: BorderRadius.circular(12),
+                          color: _selectedDateTime != null
+                              ? const Color.fromARGB(
+                                  255,
+                                  58,
+                                  183,
+                                  108,
+                                ).withOpacity(0.05)
+                              : Colors.transparent,
                         ),
                         child: Row(
                           children: [
@@ -315,7 +273,7 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
                               Icons.access_time,
                               color: _selectedDateTime != null
                                   ? const Color.fromARGB(255, 58, 183, 108)
-                                  : Colors.grey[400],
+                                  : Colors.grey.shade400,
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -325,7 +283,10 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
                                   fontSize: 16,
                                   color: _selectedDateTime != null
                                       ? Colors.black87
-                                      : Colors.grey[500],
+                                      : Colors.grey.shade500,
+                                  fontWeight: _selectedDateTime != null
+                                      ? FontWeight.w500
+                                      : FontWeight.normal,
                                 ),
                               ),
                             ),
@@ -333,7 +294,7 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
                               Icons.calendar_today,
                               color: _selectedDateTime != null
                                   ? const Color.fromARGB(255, 58, 183, 108)
-                                  : Colors.grey[400],
+                                  : Colors.grey.shade400,
                               size: 20,
                             ),
                           ],
@@ -341,14 +302,14 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
                       ),
                     ),
 
-                    // Info waktu terpilih
+                    // Info tambahan tentang pemilihan waktu
                     if (_selectedDateTime != null) ...[
                       const SizedBox(height: 8),
                       Text(
-                        'Terpilih: ${_selectedDateTime!.day}/${_selectedDateTime!.month}/${_selectedDateTime!.year} • ${_selectedDateTime!.hour.toString().padLeft(2, '0')}:${_selectedDateTime!.minute.toString().padLeft(2, '0')}',
-                        style: const TextStyle(
+                        'Obat akan diingatkan pada waktu yang dipilih',
+                        style: TextStyle(
                           fontSize: 14,
-                          color: Color.fromARGB(255, 58, 183, 108),
+                          color: Colors.green.shade600,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -387,5 +348,43 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
         ),
       ),
     );
+  }
+
+  // Helper method untuk label section
+  Widget _buildSectionLabel(String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey.shade700,
+      ),
+    );
+  }
+
+  // Helper method untuk input decoration
+  InputDecoration _buildInputDecoration({required String hintText}) {
+    return InputDecoration(
+      hintText: hintText,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color.fromARGB(255, 58, 183, 108),
+          width: 2,
+        ),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _doseController.dispose();
+    super.dispose();
   }
 }
